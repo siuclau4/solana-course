@@ -1,1 +1,1 @@
-Solana practice
+Solana course
