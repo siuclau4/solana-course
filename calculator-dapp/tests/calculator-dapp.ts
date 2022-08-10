@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
-import { expect } from "chai";
+import { assert, expect } from "chai";
 import { CalculatorDapp } from "../target/types/calculator_dapp";
 
 describe("calculator-dapp", () => {
@@ -12,9 +12,10 @@ describe("calculator-dapp", () => {
   const program = anchor.workspace.CalculatorDapp as Program<CalculatorDapp>;
 
   it("Creates a calculator", async () => {
+    const greetingStr: string = "hi";
 
     await program.methods
-      .create("hi")
+      .create(greetingStr)
       .accounts({
         calculator: calculator.publicKey,
         user: provider.publicKey,
@@ -26,7 +27,26 @@ describe("calculator-dapp", () => {
     const account = await program.account.calculator.fetch(
       calculator.publicKey
     );
-    
-    expect(account.greeting === "hi");
+
+    expect(account.greeting).to.be.equal(greetingStr);
+  });
+
+  it("should able to add two numbers", async () => {
+    const num1 = 3;
+    const num2 = 2;
+
+    await program.methods
+      .add(new anchor.BN(num1), new anchor.BN(num2))
+      .accounts({
+        calculator: calculator.publicKey, // no need to add user & system program & signer after create
+      })
+      .rpc();
+
+    const account = await program.account.calculator.fetch(
+      calculator.publicKey
+    );
+
+    // BN to number
+    expect(account.result.toNumber()).to.be.equal(num1 + num2);
   });
 });

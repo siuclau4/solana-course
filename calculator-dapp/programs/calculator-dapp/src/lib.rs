@@ -9,8 +9,14 @@ pub mod calculator_dapp {
     use super::*;
 
     pub fn create(_ctx: Context<Create>, _init_message: String) -> Result<()> {
-        let calculator = &mut _ctx.accounts.calculator;
+        let calculator: & mut Account<Calculator> = &mut _ctx.accounts.calculator;
         calculator.greeting = _init_message;
+        Ok(())
+    }
+
+    pub fn add(_ctx: Context<Addition>, _num1: i64, _num2: i64) -> Result<()> {
+        let calculator: & mut Account<Calculator> = &mut _ctx.accounts.calculator;
+        calculator.result = _num1 + _num2;
         Ok(())
     }
 }
@@ -19,23 +25,31 @@ pub mod calculator_dapp {
 #[derive(Default)]
 pub struct Calculator {
     pub greeting: String,
+    // for returning calculation result
     pub result: i64,
     pub remainder: i64
 }
 
 // retrieve the list of accounts' data
-// derive macro
+// derive macro, need to added when using the account
 #[derive(Accounts)]
 pub struct Create<'info> {
     // init: init calculator account
     // payer: who pay the cost for creating account
     // space: the amount of space allocated for the account
-    #[account(mut)]
-    pub user: Signer<'info>,
     #[account(init, payer=user, space=264)]
     pub calculator: Account<'info, Calculator>,
+    pub system_program: Program<'info, System>,
+
     // required for using 'account'
-    pub system_program: Program<'info, System>
+    #[account(mut)]
+    pub user: Signer<'info>
 }
 
+#[derive(Accounts)]
+pub struct Addition<'info> {
+    // required for using 'account'
+    #[account(mut)]
+    pub calculator: Account<'info, Calculator>,
+}
 
