@@ -1,11 +1,10 @@
 [features]
 seeds = false
-skip-lint = false
 [programs.localnet]
-calculator_dapp = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+crowd_funding = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [registry]
-url = "https://api.apr.dev"
+url = "https://anchor.projectserum.com"
 
 [provider]
 cluster = "localnet"
