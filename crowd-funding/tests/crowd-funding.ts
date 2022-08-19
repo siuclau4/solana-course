@@ -2,7 +2,10 @@ import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
 import { CrowdFunding } from "../target/types/crowd_funding";
 import { expect } from "chai";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Connection } from "@solana/web3.js";
+
+const cluster = "http://localhost:8899";
+const connection = new Connection(cluster, "confirmed");
 
 describe("crowd-funding", () => {
   let provider: anchor.AnchorProvider;
@@ -20,7 +23,7 @@ describe("crowd-funding", () => {
       await PublicKey.findProgramAddress(
         [
           anchor.utils.bytes.utf8.encode("CAMPAIGN_DEMO"),
-          provider.publicKey.toBuffer(),
+          program.provider.publicKey.toBuffer(),
         ],
         program.programId
       )
@@ -55,19 +58,23 @@ describe("crowd-funding", () => {
     let account = await program.account.campaign.fetch(campaignPDA);
     const orginialDonated = account.accountDonated.toNumber();
 
-    // const newUser = anchor.web3.Keypair.generate();
+    const newUser = anchor.web3.Keypair.generate();
+
+    let balance = await connection.getBalance(newUser.publicKey);
+    console.log(balance)
 
     await program.methods
-      .donate(new anchor.BN(1))
+      .donate(new anchor.BN(0))
       .accounts({
         campaign: campaignPDA, // no need to add user & system program & signer after create
+        user: newUser.publicKey
       })
-      // .signers([newUser])
+      .signers([newUser])
       .rpc();
 
     // console.log(tx)
 
     account = await program.account.campaign.fetch(campaignPDA);
-    expect(account.accountDonated.toNumber()).to.be.equal(orginialDonated + 1);
+    expect(account.accountDonated.toNumber()).to.be.equal(orginialDonated + 0);
   });
 });
