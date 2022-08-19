@@ -1,13 +1,17 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
+// use anchor_lang::solana_program::system_instruction::transfer;
+// use anchor_lang::solana_program::program::invoke;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+
+declare_id!("98iDNvmZNL18JGNS3BPXZgtkBFCxmQM8QYSQff6q7xzN");
+// declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 #[program]
 pub mod crowd_funding {
     use super::*;
 
-    pub fn create(_ctx: Context<Create>, _name:String, description:String) -> Result<()> {
+    pub fn create(_ctx: Context<Create>, _name:String, description:String) -> ProgramResult {
         let campaign = &mut _ctx.accounts.campaign;
         campaign.name = _name;
         campaign.description = description;
@@ -33,6 +37,31 @@ pub mod crowd_funding {
         }
         **campaign.to_account_info().try_borrow_mut_lamports()? -= _amount;
         **user.to_account_info().try_borrow_mut_lamports()? += _amount;
+        Ok(())
+    }
+
+    pub fn donate(_ctx: Context<Donate>, _amount: u64) -> ProgramResult {
+        /* 
+        in this case, program has no right to transfer user's token
+        we need to use 'instruction' to ask user to transfer
+        */
+
+        let ix = transfer(
+            &_ctx.accounts.user.key(),
+            &_ctx.accounts.campaign.key(),
+            _amount
+        );
+
+        invoke(
+            &ix,
+            &[
+                _ctx.accounts.user.to_account_info(),
+                _ctx.accounts.campaign.to_account_info()
+            ]
+        )?;
+
+        let campaign = &mut _ctx.accounts.campaign;
+        campaign.account_donated += _amount;
         Ok(())
     }
 }
@@ -70,5 +99,15 @@ pub struct Withdraw<'info> {
     pub campaign: Account<'info, Campaign>,
     #[account(mut)]
     pub user: Signer<'info>
+}
+
+#[derive(Accounts)]
+pub struct Donate<'info> {
+    #[account(mut)]
+    pub campaign: Account<'info, Campaign>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
 }
 
