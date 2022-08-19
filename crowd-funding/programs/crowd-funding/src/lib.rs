@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
-// use anchor_lang::solana_program::system_instruction::transfer;
-// use anchor_lang::solana_program::program::invoke;
+use anchor_lang::solana_program::system_instruction::transfer;
+use anchor_lang::solana_program::program::invoke;
 
 
 declare_id!("98iDNvmZNL18JGNS3BPXZgtkBFCxmQM8QYSQff6q7xzN");
@@ -81,7 +81,8 @@ pub struct Create<'info> {
     // payer: who pay the cost for creating account
     // space: the amount of space allocated for the account
     // seeds, required for storing data
-    #[account(init, payer=user, space=9000,
+    #[account(init, payer=user, 
+        space=9000,
     seeds=[b"CAMPAIGN_DEMO".as_ref(), user.key().as_ref()], // solana will use hash function to determine the address of the account
     bump // add 8-bit bump to the hash function
     )]
