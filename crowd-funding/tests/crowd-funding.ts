@@ -16,8 +16,10 @@ chai.use(chaiAsPromised);
 
 const { expect } = chai;
 
-// set the cluster to localhost
-const cluster = "http://localhost:8899"; // clusterApiUrl("devnet");
+// set the cluster
+// when using devnet, have to config Anchor.toml and the lib.rs declare_id!("..."); value
+// const cluster = clusterApiUrl("devnet");
+const cluster = "http://localhost:8899";
 const connection = new Connection(cluster, "confirmed");
 
 describe("crowd-funding", () => {
@@ -28,6 +30,11 @@ describe("crowd-funding", () => {
   before(async () => {
     // Configure the client to use the local cluster.
     provider = anchor.AnchorProvider.env();
+
+    console.log(provider.publicKey.toString());
+    const balance: number = await connection.getBalance(provider.publicKey);
+    console.log(balance);
+
     anchor.setProvider(provider);
     program = anchor.workspace.CrowdFunding;
 

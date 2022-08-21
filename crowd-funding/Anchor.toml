@@ -1,7 +1,7 @@
 [features]
 seeds = false
 [programs.localnet]
-crowd_funding = "98iDNvmZNL18JGNS3BPXZgtkBFCxmQM8QYSQff6q7xzN"
+crowd_funding = "GPs3vwGSfdMBivvLT2Mihp6d8CYTnAikNjZqtktGxLN9"
 # crowd_funding = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 
 [registry]
@@ -9,9 +9,8 @@ url = "https://anchor.projectserum.com"
 
 [provider]
 cluster = "localnet"
-wallet = "/Users/chung/.config/solana/id.json"
 # cluster = "devnet"
-# wallet = "./id.json"
+wallet = "./id.json"
 
 
 [scripts]

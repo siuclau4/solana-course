@@ -4,8 +4,8 @@ use anchor_lang::solana_program::system_instruction::transfer;
 use anchor_lang::solana_program::program::invoke;
 
 
-declare_id!("98iDNvmZNL18JGNS3BPXZgtkBFCxmQM8QYSQff6q7xzN");
-// declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+// declare_id!("98iDNvmZNL18JGNS3BPXZgtkBFCxmQM8QYSQff6q7xzN");
+declare_id!("GPs3vwGSfdMBivvLT2Mihp6d8CYTnAikNjZqtktGxLN9");
 
 #[program]
 pub mod crowd_funding {
