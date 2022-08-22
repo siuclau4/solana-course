@@ -16,7 +16,7 @@ import {
   BN,
   Idl,
 } from "@project-serum/anchor";
-import { CrowdFunding, IDL } from "./crowd_funding";
+import { CrowdFunding } from "./crowd_funding";
 import { Buffer } from "buffer";
 
 window.Buffer = Buffer;
@@ -106,15 +106,15 @@ const App: FC = () => {
         program.programId
       );
 
-      const name = "save me";
-      const description = "save me!!!";
+      const name = "save me2";
+      const description = "save me!!!!";
 
       await program.methods
         .create(name, description)
         .accounts({
           campaign: campaignPDA,
           user: provider.publicKey,
-          systemProgram: web3.SystemProgram.programId,
+          systemProgram: SystemProgram.programId,
         })
         .rpc();
 
@@ -123,6 +123,44 @@ const App: FC = () => {
       );
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const donate = async (publicKey: PublicKey) => {
+    try {
+    const provider = getProvider();
+    const program = new Program(idl as Idl, PROGRAM_ID, provider);
+
+    await program.methods
+      .donate(new BN(0.2 * web3.LAMPORTS_PER_SOL))
+      .accounts({
+        campaign: publicKey,
+        user: provider.publicKey
+      })
+      .rpc();
+
+    console.log("Donated some money to:", publicKey.toString());
+    await getCampaigns();
+    } catch (error) {
+      console.error("Error donating:", error);
+    }
+  };
+
+  const withdraw = async (publicKey: PublicKey) => {
+    try {
+      const provider = getProvider();
+      const program = new Program(idl as Idl, PROGRAM_ID, provider);
+      await program.methods
+        .withdraw(new BN(0.2 * LAMPORTS_PER_SOL))
+        .accounts({
+          campaign: publicKey,
+          user: provider.publicKey,
+        })
+        .rpc();
+
+      console.log("Withdrew some money from:", publicKey.toString());
+    } catch (error) {
+      console.error("Error withdrawing:", error);
     }
   };
 
@@ -135,8 +173,8 @@ const App: FC = () => {
       <button onClick={createCampaign}>Create a campaign</button>
       <button onClick={getCampaigns}>Get all campaigns</button>
       <br />
-      {campaigns.map((campaign) => (
-        <>
+      {campaigns.map((campaign, index) => (
+        <div key={"campaign-" + index}>
           <p>Campaign ID: {campaign.pubkey.toString()}</p>
           <p>
             Balance:
@@ -144,7 +182,13 @@ const App: FC = () => {
           </p>
           <p>{campaign.name}</p>
           <p>{campaign.description}</p>
-        </>
+          <button onClick={async () => donate(campaign.pubkey)}>
+            Click to donate!
+          </button>
+          <button onClick={() => withdraw(campaign.pubkey)}>
+            Click to withdraw!
+          </button>
+        </div>
       ))}
     </>
   );
