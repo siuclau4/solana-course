@@ -29,6 +29,7 @@ type Campaign = {
   admin: PublicKey;
 };
 
+// ID must be "GPs3vwGSfdMBivvLT2Mihp6d8CYTnAikNjZqtktGxLN9"
 const PROGRAM_ID = new PublicKey(idl.metadata.address);
 const NETWORK = clusterApiUrl("devnet");
 
