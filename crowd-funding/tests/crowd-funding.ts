@@ -16,24 +16,26 @@ chai.use(chaiAsPromised);
 
 const { expect } = chai;
 
-// set the cluster
-// when using devnet, have to config Anchor.toml and the lib.rs declare_id!("..."); value
-// const cluster = clusterApiUrl("devnet");
-const cluster = "http://localhost:8899";
-const connection = new Connection(cluster, "confirmed");
-
 describe("crowd-funding", () => {
   let provider: anchor.AnchorProvider;
   let program: Program<CrowdFunding>;
   let campaignPDA: anchor.web3.PublicKey;
+  let connection: Connection;
 
   before(async () => {
     // Configure the client to use the local cluster.
     provider = anchor.AnchorProvider.env();
 
-    console.log(provider.publicKey.toString());
-    const balance: number = await connection.getBalance(provider.publicKey);
-    console.log(balance);
+    // set the cluster
+    // when using devnet, have to config Anchor.toml and the lib.rs declare_id!("..."); value
+    // for testnet check list: https://www.anchor-lang.com/docs/tic-tac-toe#deployment
+    // const cluster = clusterApiUrl("devnet");
+    // const cluster = "http://localhost:8899";
+
+    const cluster = provider.connection.rpcEndpoint === "http://localhost:8899" ? "http://localhost:8899": clusterApiUrl()
+
+
+    connection = new Connection(cluster, "confirmed");
 
     anchor.setProvider(provider);
     program = anchor.workspace.CrowdFunding;
