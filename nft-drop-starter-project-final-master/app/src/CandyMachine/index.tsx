@@ -13,6 +13,7 @@ import {
   getNetworkToken,
   CIVIC,
 } from "./helpers";
+import { IPhantomProvider } from "../interfaces";
 
 const { SystemProgram } = web3;
 const opts: { preflightCommitment: Commitment } = {
@@ -20,10 +21,10 @@ const opts: { preflightCommitment: Commitment } = {
 };
 
 interface ICandyMachine {
-  walletAddress: any;
+  phantom: IPhantomProvider;
 }
 
-const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
+const CandyMachine: FC<ICandyMachine> = ({ phantom }) => {
   const [candyMachine, setCandyMachine] = useState<any>(null);
 
   useEffect(() => {
@@ -173,17 +174,14 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
     const mint = web3.Keypair.generate();
 
     const userTokenAccountAddress = (
-      await getAtaForMint(mint.publicKey, walletAddress.publicKey)
+      await getAtaForMint(mint.publicKey, phantom.publicKey)
     )[0];
 
     const userPayingAccountAddress = candyMachine.state.tokenMint
       ? (
-          await getAtaForMint(
-            candyMachine.state.tokenMint,
-            walletAddress.publicKey
-          )
+          await getAtaForMint(candyMachine.state.tokenMint, phantom.publicKey)
         )[0]
-      : walletAddress.publicKey;
+      : phantom.publicKey;
 
     const candyMachineAddress = candyMachine.id;
     const remainingAccounts = [];
@@ -191,7 +189,7 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
     const cleanupInstructions = [];
     const instructions = [
       web3.SystemProgram.createAccount({
-        fromPubkey: walletAddress.publicKey,
+        fromPubkey: phantom.publicKey,
         newAccountPubkey: mint.publicKey,
         space: MintLayout.span,
         lamports:
@@ -204,20 +202,20 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
         TOKEN_PROGRAM_ID,
         mint.publicKey,
         0,
-        walletAddress.publicKey,
-        walletAddress.publicKey
+        phantom.publicKey,
+        phantom.publicKey
       ),
       createAssociatedTokenAccountInstruction(
         userTokenAccountAddress,
-        walletAddress.publicKey,
-        walletAddress.publicKey,
+        phantom.publicKey,
+        phantom.publicKey,
         mint.publicKey
       ),
       Token.createMintToInstruction(
         TOKEN_PROGRAM_ID,
         mint.publicKey,
         userTokenAccountAddress,
-        walletAddress.publicKey,
+        phantom.publicKey,
         [],
         1
       ),
@@ -227,7 +225,7 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
       remainingAccounts.push({
         pubkey: (
           await getNetworkToken(
-            walletAddress.publicKey,
+            phantom.publicKey,
             candyMachine.state.gatekeeper.gatekeeperNetwork
           )
         )[0],
@@ -256,9 +254,7 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
         candyMachine.state.whitelistMintSettings.mint
       );
 
-      const whitelistToken = (
-        await getAtaForMint(mint, walletAddress.publicKey)
-      )[0];
+      const whitelistToken = (await getAtaForMint(mint, phantom.publicKey))[0];
       remainingAccounts.push({
         pubkey: whitelistToken,
         isWritable: true,
@@ -289,7 +285,7 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
               TOKEN_PROGRAM_ID,
               whitelistToken,
               whitelistBurnAuthority.publicKey,
-              walletAddress.publicKey,
+              phantom.publicKey,
               [],
               1
             )
@@ -298,7 +294,7 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
             Token.createRevokeInstruction(
               TOKEN_PROGRAM_ID,
               whitelistToken,
-              walletAddress.publicKey,
+              phantom.publicKey,
               []
             )
           );
@@ -326,7 +322,7 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
           TOKEN_PROGRAM_ID,
           userPayingAccountAddress,
           transferAuthority.publicKey,
-          walletAddress.publicKey,
+          phantom.publicKey,
           [],
           candyMachine.state.price.toNumber()
         )
@@ -335,7 +331,7 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
         Token.createRevokeInstruction(
           TOKEN_PROGRAM_ID,
           userPayingAccountAddress,
-          walletAddress.publicKey,
+          phantom.publicKey,
           []
         )
       );
@@ -352,13 +348,13 @@ const CandyMachine: FC<ICandyMachine> = ({ walletAddress }) => {
         accounts: {
           candyMachine: candyMachineAddress,
           candyMachineCreator,
-          payer: walletAddress.publicKey,
+          payer: phantom.publicKey,
           wallet: candyMachine.state.treasury,
           mint: mint.publicKey,
           metadata: metadataAddress,
           masterEdition,
-          mintAuthority: walletAddress.publicKey,
-          updateAuthority: walletAddress.publicKey,
+          mintAuthority: phantom.publicKey,
+          updateAuthority: phantom.publicKey,
           tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
