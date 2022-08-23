@@ -32,6 +32,7 @@ ts-node <path-to-cli>/candy-machine-v2-cli.ts verify_upload -e devnet -k <path-t
 ```
 
 Sugar cli:
+https://docs.metaplex.com/developer-tools/sugar/
 
 create config
 
