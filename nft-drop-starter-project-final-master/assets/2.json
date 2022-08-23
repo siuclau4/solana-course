@@ -1,14 +1,14 @@
 {
-	"name": "Remo",
-	"symbol": "REM",
-	"image": "2.png",
-	"properties": {
-		"files": [{ "url": "2.png", "type": "image/png" }],
-		"creators": [
-			{
-				"address": "BqEgPTcDX1upXSee8DFhSgNmX5Mn72krsYVpfoKZPzEi",
-				"share": 100
-			}
-		]
-	}
+  "name": "Remo",
+  "symbol": "REM",
+  "image": "2.png",
+  "properties": {
+    "files": [{ "url": "2.png", "type": "image/png" }],
+    "creators": [
+      {
+        "address": "GejYrSwPpJueonB3iZmJ9jgSZSZTwVz2XBnnmFG8mqpC",
+        "share": 100
+      }
+    ]
+  }
 }
