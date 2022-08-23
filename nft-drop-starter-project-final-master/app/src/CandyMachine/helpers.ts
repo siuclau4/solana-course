@@ -8,24 +8,9 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 
-// CLI Properties Given to us
-const candyMachineProgram = new web3.PublicKey(
-  "cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ"
-);
+import { CIVIC, SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID } from "./constants";
 
-const TOKEN_METADATA_PROGRAM_ID = new web3.PublicKey(
-  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-);
-
-const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new web3.PublicKey(
-  "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-);
-
-const CIVIC = new anchor.web3.PublicKey(
-  "gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs"
-);
-
-const toDate = (value: any) => {
+export const toDate = (value?: anchor.BN) => {
   if (!value) {
     return;
   }
@@ -39,15 +24,15 @@ const numberFormater = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-const formatNumber = {
-  format: (val: any) => {
+export const formatNumber = {
+  format: (val?: number) => {
     if (!val) {
       return "--";
     }
 
     return numberFormater.format(val);
   },
-  asNumber: (val: any) => {
+  asNumber: (val?: anchor.BN) => {
     if (!val) {
       return undefined;
     }
@@ -56,21 +41,29 @@ const formatNumber = {
   },
 };
 
-const getAtaForMint = async (mint: PublicKey, buyer: PublicKey) => {
+export const getAtaForMint = async (
+  mint: anchor.web3.PublicKey,
+  buyer: anchor.web3.PublicKey
+): Promise<[anchor.web3.PublicKey, number]> => {
   return await anchor.web3.PublicKey.findProgramAddress(
     [buyer.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
     SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID
   );
 };
 
-const getNetworkExpire = async (gatekeeperNetwork: any) => {
+export const getNetworkExpire = async (
+  gatekeeperNetwork: anchor.web3.PublicKey
+): Promise<[anchor.web3.PublicKey, number]> => {
   return await anchor.web3.PublicKey.findProgramAddress(
     [gatekeeperNetwork.toBuffer(), Buffer.from("expire")],
     CIVIC
   );
 };
 
-const getNetworkToken = async (wallet: PublicKey, gatekeeperNetwork: any) => {
+export const getNetworkToken = async (
+  wallet: anchor.web3.PublicKey,
+  gatekeeperNetwork: anchor.web3.PublicKey
+): Promise<[anchor.web3.PublicKey, number]> => {
   return await anchor.web3.PublicKey.findProgramAddress(
     [
       wallet.toBuffer(),
@@ -82,11 +75,11 @@ const getNetworkToken = async (wallet: PublicKey, gatekeeperNetwork: any) => {
   );
 };
 
-function createAssociatedTokenAccountInstruction(
-  associatedTokenAddress: any,
-  payer: any,
-  walletAddress: any,
-  splTokenMintAddress: any
+export function createAssociatedTokenAccountInstruction(
+  associatedTokenAddress: anchor.web3.PublicKey,
+  payer: anchor.web3.PublicKey,
+  walletAddress: anchor.web3.PublicKey,
+  splTokenMintAddress: anchor.web3.PublicKey
 ) {
   const keys = [
     {
@@ -131,16 +124,3 @@ function createAssociatedTokenAccountInstruction(
     data: Buffer.from([]),
   });
 }
-
-export {
-  candyMachineProgram,
-  TOKEN_METADATA_PROGRAM_ID,
-  SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-  CIVIC,
-  toDate,
-  formatNumber,
-  getAtaForMint,
-  getNetworkExpire,
-  getNetworkToken,
-  createAssociatedTokenAccountInstruction,
-};

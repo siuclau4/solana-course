@@ -4,28 +4,29 @@ import { AnchorProvider, Idl, Program, web3 } from "@project-serum/anchor";
 import { MintLayout, TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
 import { sendTransactions } from "./connection";
 import "./CandyMachine.css";
+import { getAtaForMint, getNetworkExpire, getNetworkToken } from "./helpers";
+import { IPhantomProvider } from "../interfaces";
 import {
   candyMachineProgram,
-  TOKEN_METADATA_PROGRAM_ID,
-  SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
-  getAtaForMint,
-  getNetworkExpire,
-  getNetworkToken,
   CIVIC,
-} from "./helpers";
-import { IPhantomProvider } from "../interfaces";
+  SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
+  TOKEN_METADATA_PROGRAM_ID,
+} from "./constants";
+import { ICandyMachineAccount, ICandyMachineState } from "./interfaces";
 
 const { SystemProgram } = web3;
 const opts: { preflightCommitment: Commitment } = {
   preflightCommitment: "processed",
 };
 
-interface ICandyMachine {
+interface ICandyMachineProps {
   phantom: IPhantomProvider;
 }
 
-const CandyMachine: FC<ICandyMachine> = ({ phantom }) => {
-  const [candyMachine, setCandyMachine] = useState<any>(null);
+const CandyMachine: FC<ICandyMachineProps> = ({ phantom }) => {
+  const [candyMachine, setCandyMachine] = useState<ICandyMachineAccount | null>(
+    null
+  );
 
   useEffect(() => {
     getCandyMachineState();
@@ -45,14 +46,16 @@ const CandyMachine: FC<ICandyMachine> = ({ phantom }) => {
     const itemsAvailable = candyMachine.data.itemsAvailable.toNumber();
     const itemsRedeemed = candyMachine.itemsRedeemed.toNumber();
     const itemsRemaining = itemsAvailable - itemsRedeemed;
-    const goLiveData = candyMachine.data.goLiveDate.toNumber();
+    const goLiveDate = candyMachine.data.goLiveDate.toNumber();
     const presale =
       candyMachine.data.whitelistMintSettings &&
       candyMachine.data.whitelistMintSettings.presale &&
       (!candyMachine.data.goLiveDate ||
         candyMachine.data.goLiveDate.toNumber() > new Date().getTime() / 1000);
 
-    const goLiveDateTimeString = `${new Date(goLiveData * 1000).toUTCString()}`;
+    const goLiveDateTimeString = `${new Date(goLiveDate * 1000).toUTCString()}`;
+
+    // console.log(candyMachine);
 
     setCandyMachine({
       id: process.env.REACT_APP_CANDY_MACHINE_ID || "",
@@ -61,7 +64,6 @@ const CandyMachine: FC<ICandyMachine> = ({ phantom }) => {
         itemsAvailable,
         itemsRedeemed,
         itemsRemaining,
-        goLiveData,
         goLiveDateTimeString,
         isSoldOut: itemsRemaining === 0,
         isActive:
@@ -84,14 +86,6 @@ const CandyMachine: FC<ICandyMachine> = ({ phantom }) => {
         hiddenSettings: candyMachine.data.hiddenSettings,
         price: candyMachine.data.price,
       },
-    });
-
-    console.log({
-      itemsAvailable,
-      itemsRedeemed,
-      itemsRemaining,
-      goLiveData,
-      goLiveDateTimeString,
     });
   };
   const getProvider = () => {
@@ -171,12 +165,15 @@ const CandyMachine: FC<ICandyMachine> = ({ phantom }) => {
   };
 
   const mintToken = async () => {
+    if (!candyMachine) return;
     const mint = web3.Keypair.generate();
 
+    // create account for use to hold NFT
     const userTokenAccountAddress = (
       await getAtaForMint(mint.publicKey, phantom.publicKey)
     )[0];
 
+    // params have to provide to mint
     const userPayingAccountAddress = candyMachine.state.tokenMint
       ? (
           await getAtaForMint(candyMachine.state.tokenMint, phantom.publicKey)
