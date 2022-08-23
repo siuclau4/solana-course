@@ -30,3 +30,6 @@ verify command
 ```
 ts-node <path-to-cli>/candy-machine-v2-cli.ts verify_upload -e devnet -k <path-to-solana-devnet-config>
 ```
+
+Candy Machine UI template (TypeScript)
+https://github.com/Fulgurus/candy-machine-v2-responsive-ui
