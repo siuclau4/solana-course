@@ -1,13 +1,19 @@
 {
-  "name": "Remo",
-  "symbol": "REM",
+  "name": "Number #0003",
+  "symbol": "NB",
+  "description": "Collection of 10 numbers on the blockchain. This is the number 3/10.",
   "image": "2.png",
+  "attributes": [
+    {
+      "trait_type": "Number",
+      "value": "3"
+    }
+  ],
   "properties": {
-    "files": [{ "url": "2.png", "type": "image/png" }],
-    "creators": [
+    "files": [
       {
-        "address": "GejYrSwPpJueonB3iZmJ9jgSZSZTwVz2XBnnmFG8mqpC",
-        "share": 100
+        "uri": "2.png",
+        "type": "image/png"
       }
     ]
   }

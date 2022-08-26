@@ -1,13 +1,19 @@
 {
-  "name": "Ambi",
-  "symbol": "AMB",
+  "name": "Number #0001",
+  "symbol": "NB",
+  "description": "Collection of 10 numbers on the blockchain. This is the number 1/10.",
   "image": "0.png",
+  "attributes": [
+    {
+      "trait_type": "Number",
+      "value": "0"
+    }
+  ],
   "properties": {
-    "files": [{ "url": "0.png", "type": "image/png" }],
-    "creators": [
+    "files": [
       {
-        "address": "GejYrSwPpJueonB3iZmJ9jgSZSZTwVz2XBnnmFG8mqpC",
-        "share": 100
+        "uri": "0.png",
+        "type": "image/png"
       }
     ]
   }

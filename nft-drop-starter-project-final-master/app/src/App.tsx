@@ -1,79 +1,89 @@
-import { WalletError } from "@solana/wallet-adapter-base";
-import React, { useEffect, useState } from "react";
 import "./App.css";
-import twitterLogo from "./assets/twitter-logo.svg";
-import CandyMachine from "./CandyMachine";
+import { useMemo } from "react";
+import * as anchor from "@project-serum/anchor";
+import Home from "./Home";
+import { DEFAULT_TIMEOUT } from "./connection";
+import { clusterApiUrl } from "@solana/web3.js";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import {
+  getPhantomWallet,
+  getSlopeWallet,
+  getSolflareWallet,
+  getSolletExtensionWallet,
+  getSolletWallet,
+} from "@solana/wallet-adapter-wallets";
 
-// Constants
-const TWITTER_HANDLE = "_buildspace";
-const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+import { WalletDialogProvider } from "@solana/wallet-adapter-material-ui";
+
+import { createTheme, ThemeProvider } from "@material-ui/core";
+
+const theme = createTheme({
+  palette: {
+    type: "dark",
+  },
+});
+
+const getCandyMachineId = (): anchor.web3.PublicKey | undefined => {
+  try {
+    return new anchor.web3.PublicKey(process.env.REACT_APP_CANDY_MACHINE_ID!);
+  } catch (e) {
+    console.log("Failed to construct CandyMachineId", e);
+    return undefined;
+  }
+};
+
+let error: string | undefined = undefined;
+
+if (process.env.REACT_APP_SOLANA_NETWORK === undefined) {
+  error =
+    "Your REACT_APP_SOLANA_NETWORK value in the .env file doesn't look right! The options are devnet and mainnet-beta!";
+} else if (process.env.REACT_APP_SOLANA_RPC_HOST === undefined) {
+  error =
+    "Your REACT_APP_SOLANA_RPC_HOST value in the .env file doesn't look right! Make sure you enter it in as a plain-text url (i.e., https://metaplex.devnet.rpcpool.com/)";
+}
+
+const candyMachineId = getCandyMachineId();
+const network = (process.env.REACT_APP_SOLANA_NETWORK ??
+  "devnet") as WalletAdapterNetwork;
+const rpcHost =
+  process.env.REACT_APP_SOLANA_RPC_HOST ?? anchor.web3.clusterApiUrl("devnet");
+const connection = new anchor.web3.Connection(rpcHost);
 
 const App = () => {
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const checkIfWalletIsConnected = async () => {
-    try {
-      const { solana } = window;
-      if (solana && solana.isPhantom) {
-        console.log("Phantom wallet found!");
-        const response = await solana.connect({
-          onlyIfTrusted: true,
-        });
-        console.log(
-          "Connected with Public Key:",
-          response.publicKey.toString()
-        );
-        setWalletAddress(response.publicKey.toString());
-      } else {
-        alert("Solana object not found! Get a Phantom Wallet!");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  const connectWallet = async () => {
-    const { solana } = window;
-    if (solana) {
-      const response = await solana.connect();
-      console.log("Connected with Public Key:", response.publicKey.toString());
-      setWalletAddress(response.publicKey.toString());
-    }
-  };
+  const endpoint = useMemo(() => clusterApiUrl(network), []);
 
-  const renderNotConnectedContainer = () => (
-    <button
-      className="cta-button connect-wallet-button"
-      onClick={connectWallet}
-    >
-      Connect to Wallet
-    </button>
+  const wallets = useMemo(
+    () => [
+      getPhantomWallet(),
+      getSolflareWallet(),
+      getSlopeWallet(),
+      getSolletWallet({ network }),
+      getSolletExtensionWallet({ network }),
+    ],
+    []
   );
-  useEffect(() => {
-    const onLoad = async () => {
-      await checkIfWalletIsConnected();
-    };
-    window.addEventListener("load", onLoad);
-    return () => window.removeEventListener("load", onLoad);
-  }, []);
+
   return (
-    <div className="App">
-      <div className="container">
-        <div className="header-container">
-          <p className="header">🍭 Candy Drop</p>
-          <p className="sub-text">NFT drop machine with fair mint</p>
-          {!walletAddress && renderNotConnectedContainer()}
-        </div>
-        {walletAddress && <CandyMachine phantom={window.solana} />}
-        <div className="footer-container">
-          <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
-          <a
-            className="footer-text"
-            href={TWITTER_LINK}
-            target="_blank"
-            rel="noreferrer"
-          >{`Adapted from @${TWITTER_HANDLE}`}</a>
-        </div>
-      </div>
-    </div>
+    <ThemeProvider theme={theme}>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets} autoConnect>
+          <WalletDialogProvider>
+            <Home
+              candyMachineId={candyMachineId}
+              connection={connection}
+              txTimeout={DEFAULT_TIMEOUT}
+              rpcHost={rpcHost}
+              network={network}
+              error={error}
+            />
+          </WalletDialogProvider>
+        </WalletProvider>
+      </ConnectionProvider>
+    </ThemeProvider>
   );
 };
 

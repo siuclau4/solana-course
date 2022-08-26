@@ -12,7 +12,7 @@ import {
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
   TOKEN_METADATA_PROGRAM_ID,
 } from "./constants";
-import { ICandyMachineAccount, ICandyMachineState } from "./interfaces";
+import { ICandyMachineAccount } from "./interfaces";
 
 const { SystemProgram } = web3;
 const opts: { preflightCommitment: Commitment } = {
@@ -35,6 +35,8 @@ const CandyMachine: FC<ICandyMachineProps> = ({ phantom }) => {
   const getCandyMachineState = async () => {
     const provider = getProvider();
 
+    console.log(provider);
+
     const idl = await Program.fetchIdl(candyMachineProgram, provider);
 
     const program = new Program(idl as Idl, candyMachineProgram, provider);
@@ -42,6 +44,8 @@ const CandyMachine: FC<ICandyMachineProps> = ({ phantom }) => {
     const candyMachine: any = await program.account.candyMachine.fetch(
       process.env.REACT_APP_CANDY_MACHINE_ID || ""
     );
+
+    console.log(candyMachine);
 
     const itemsAvailable = candyMachine.data.itemsAvailable.toNumber();
     const itemsRedeemed = candyMachine.itemsRedeemed.toNumber();
@@ -55,7 +59,7 @@ const CandyMachine: FC<ICandyMachineProps> = ({ phantom }) => {
 
     const goLiveDateTimeString = `${new Date(goLiveDate * 1000).toUTCString()}`;
 
-    // console.log(candyMachine);
+    console.log(candyMachine.itemsRedeemed);
 
     setCandyMachine({
       id: process.env.REACT_APP_CANDY_MACHINE_ID || "",
@@ -369,7 +373,7 @@ const CandyMachine: FC<ICandyMachineProps> = ({ phantom }) => {
       return (
         await sendTransactions(
           candyMachine.program.provider.connection,
-          candyMachine.program.provider,
+          (candyMachine.program.provider as any).wallet,
           [instructions, cleanupInstructions],
           [signers, []]
         )

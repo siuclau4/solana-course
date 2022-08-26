@@ -43,14 +43,15 @@ sugar create-config
 upload command
 
 ```
-suger upload -k <path-to-solana-devnet-config> -c ./config.json
+suger upload
+super deploy
 ```
 
 verify command
 
 ```
-sugar verify -k <path-to-solana-devnet-config>
+sugar verify
 ```
 
 Candy Machine UI template (TypeScript)
-https://github.com/Fulgurus/candy-machine-v2-responsive-ui
+https://github.com/metaplex-foundation/candy-machine-ui
